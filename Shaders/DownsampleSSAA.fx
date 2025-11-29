@@ -2,14 +2,14 @@
 	DownsampleSSAA version 1.0
 	by PthoEastCoast
 
-	Makes it look as if the image was downsampled from it's native resolution to a custom lower resolution. 
+	Makes it look as if the image was downsampled from it's native resolution to a custom lower resolution.
 	Giving the impression of rendering at a lower resolution but with higher image quality comparable to supersampling.
 	It blurs the original image and then pixelates the image after blurring.
-	For best image quality - run the game at the native resolution of your display with MSAA. 
+	For best image quality - run the game at the native resolution of your display with MSAA.
 
 	Customised by _aitchFactor
 	- Default smooth factor now leaves integer scaled content unsmoothened.
-	- Nearest neighbor upscaling is no longer shifted slightly relative to the original image. 
+	- Nearest neighbor upscaling is no longer shifted slightly relative to the original image.
 	- Separate horizontal and vertical upscaling and blur settings - useful for pairing with CRT filters.
 	- Sample offset and panning options for custom alignment.
 **/
@@ -19,94 +19,94 @@
 uniform int HorizontalUpscalingSetting
 <
 	ui_type = "combo";
-	ui_items =	"Nearest-neighbor" "\0"
-				"Bilinear" "\0"
-				"Bilinear Sharp 1" "\0"
-				"Bilinear Sharp 2" "\0"
-				"Bilinear Sharp 3" "\0"
-				"Bilinear Sharp 4" "\0";
-	ui_label = "Horizontal upscaling setting";
-	ui_tooltip = "Sets the method used to upscale the downsampled image.\n"
-	"Nearest-neighbor provides a pixel sharp image.\n"
-	"Bilinear provides a smooth image by blending between neighboring pixels.\n"
-	"Bilinear Sharp 1-4 will provide a progressively sharper image than Bilinear.";
+ui_items = "Nearest-neighbor" "\0"
+"Bilinear" "\0"
+"Bilinear Sharp 1" "\0"
+"Bilinear Sharp 2" "\0"
+"Bilinear Sharp 3" "\0"
+"Bilinear Sharp 4" "\0";
+ui_label = "Horizontal upscaling setting";
+ui_tooltip = "Sets the method used to upscale the downsampled image.\n"
+"Nearest-neighbor provides a pixel sharp image.\n"
+"Bilinear provides a smooth image by blending between neighboring pixels.\n"
+"Bilinear Sharp 1-4 will provide a progressively sharper image than Bilinear.";
 > = 1;
 
 uniform int VerticalUpscalingSetting
 <
 	ui_type = "combo";
-	ui_items =	"Nearest-neighbor" "\0"
-				"Bilinear" "\0"
-				"Bilinear Sharp 1" "\0"
-				"Bilinear Sharp 2" "\0"
-				"Bilinear Sharp 3" "\0"
-				"Bilinear Sharp 4" "\0";
-	ui_label = "Vertical upscaling setting";
-	ui_tooltip = "Sets the method used to upscale the downsampled image.\n"
-	"Nearest-neighbor is the fastest and provides a pixel sharp image.\n"
-	"Bilinear provides a smooth image by blending between neighboring pixels.\n"
-	"Bilinear Sharp 1-4 will provide a progressively sharper image than Bilinear.";
+ui_items = "Nearest-neighbor" "\0"
+"Bilinear" "\0"
+"Bilinear Sharp 1" "\0"
+"Bilinear Sharp 2" "\0"
+"Bilinear Sharp 3" "\0"
+"Bilinear Sharp 4" "\0";
+ui_label = "Vertical upscaling setting";
+ui_tooltip = "Sets the method used to upscale the downsampled image.\n"
+"Nearest-neighbor is the fastest and provides a pixel sharp image.\n"
+"Bilinear provides a smooth image by blending between neighboring pixels.\n"
+"Bilinear Sharp 1-4 will provide a progressively sharper image than Bilinear.";
 > = 0;
-uniform int numOfSamplesRight 
+uniform int numOfSamplesRight
 <
 	ui_type = "input";
-	ui_min = 1; ui_max = 99;
-	ui_tooltip = "Number of samples to take for blur. Higher gets a smoother blur effect, but is slower.";
-	ui_label = "Blur samples";
+ui_min = 1; ui_max = 99;
+ui_tooltip = "Number of samples to take for blur. Higher gets a smoother blur effect, but is slower.";
+ui_label = "Blur samples";
 > = 6.0;
 
-uniform int VerticalResolution 
+uniform int VerticalResolution
 <
 	ui_type = "input";
-	ui_min = 240.0; ui_max = 1080.0;
-	ui_tooltip = "Sets the vertical resolution of the downsampled image.";
+ui_min = 240.0; ui_max = 1080.0;
+ui_tooltip = "Sets the vertical resolution of the downsampled image.";
 > = 240.0;
 
-uniform float HorizontalResolution 
+uniform float HorizontalResolution
 <
 	ui_type = "input";
-	ui_min = 0.0; ui_max = 1920.0;
-	ui_tooltip = "Set to 0.0 or negative for automatic.";
+ui_min = 0.0; ui_max = 7680.0;
+ui_tooltip = "Set to 0.0 or negative for automatic.";
 > = 0.0;
 
 uniform float HorizontalBlurFactor
 <
 	ui_type = "drag";
-	ui_min = -0.01; ui_max = 10.0; ui_step = 0.01;
-	ui_tooltip = "Sets the blur width in downsampled pixels. Set to negative for automatic (horizontal blur is synced to vertical resolution)";
-	ui_label = "Horizontal Blur";
+ui_min = -0.01; ui_max = 10.0; ui_step = 0.01;
+ui_tooltip = "Sets the blur width in downsampled pixels. Set to negative for automatic (horizontal blur is synced to vertical resolution)";
+ui_label = "Horizontal Blur";
 > = 1.0;
 
 uniform float VerticalBlurFactor
 <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 10.0; ui_step = 0.01;
-	ui_label = "Vertical Blur";
-	ui_tooltip = "Sets the blur height in downsampled pixels.";
+ui_min = 0.0; ui_max = 10.0; ui_step = 0.01;
+ui_label = "Vertical Blur";
+ui_tooltip = "Sets the blur height in downsampled pixels.";
 > = 1.0;
 
 uniform int SampleOffsetX
 < __UNIFORM_SLIDER_INT1
 	ui_min = -20; ui_max = 20;
-	ui_tooltip = "Use to align any integer scaled content to the downsampling filter.";
+ui_tooltip = "Use to align any integer scaled content to the downsampling filter.";
 > = 0.0;
 
 uniform int SampleOffsetY
 < __UNIFORM_SLIDER_INT1
 	ui_min = -20.0; ui_max = 20.0;
-	ui_tooltip = "Use to align any integer scaled content to the downsampling filter.";
+ui_tooltip = "Use to align any integer scaled content to the downsampling filter.";
 > = 0.0;
 
 uniform int PanX
 < __UNIFORM_SLIDER_INT1
 	ui_min = -20; ui_max = 20;
-	ui_tooltip = "Pans the output image horizontally.";
+ui_tooltip = "Pans the output image horizontally.";
 > = 0.0;
 
 uniform int PanY
 < __UNIFORM_SLIDER_INT1
 	ui_min = -20.0; ui_max = 20.0;
-	ui_tooltip = "Pans the output image vertically.";
+ui_tooltip = "Pans the output image vertically.";
 > = 0.0;
 
 #include "ReShade.fxh"
@@ -121,29 +121,31 @@ sampler BoxBlurVSampler{ Texture = BoxBlurVTex; };
 
 float4 BoxBlurHorizontalPass(in float4 pos : SV_Position, in float2 texcoord : TEXCOORD) : COLOR
 {
-	if (HorizontalBlurFactor == 0.0){
+	if (HorizontalBlurFactor == 0.0) {
 		return tex2D(ReShade::BackBuffer, texcoord);
-	} 
+	}
 
-	
+
 	float aspectRatio = 1.0 / BUFFER_ASPECT_RATIO;
 	float pixelUVSize;
-	if (HorizontalResolution <= 0.0){
+	if (HorizontalResolution <= 0.0) {
 		pixelUVSize = (1.0 / (float)VerticalResolution) * aspectRatio;
 	}
-	else{
+	else {
 		pixelUVSize = (1.0 / (float)HorizontalResolution);
 	}
-	
-	if (HorizontalBlurFactor < 0.0){
-		float smoothScale =  (float)HorizontalResolution/((1.0 / (float)VerticalResolution) * aspectRatio)
+
+	float smoothScale;
+	if (HorizontalBlurFactor < 0.0) {
+
+		smoothScale =  (1.0/pixelUVSize) / (VerticalResolution / aspectRatio);
 	}
-	else{
-		float smoothScale = (float)HorizontalBlurFactor
+	else {
+		smoothScale = (float)HorizontalBlurFactor;
 	}
-	
+
 ;
-	float uvDistBetweenSamples = ((pixelUVSize * smoothScale) - (1.0 / BUFFER_WIDTH)) / (0.0 + numOfSamplesRight * 2.0); 
+	float uvDistBetweenSamples = ((pixelUVSize * smoothScale) - (1.0 / BUFFER_WIDTH)) / (0.0 + numOfSamplesRight * 2.0);
 
 
 
@@ -151,7 +153,7 @@ float4 BoxBlurHorizontalPass(in float4 pos : SV_Position, in float2 texcoord : T
 
 	for (float i = -numOfSamplesRight; i <= numOfSamplesRight; i++)
 	{
-		accumulatedColor = accumulatedColor + tex2D( ReShade::BackBuffer, texcoord + float2(i * uvDistBetweenSamples - (0 / BUFFER_WIDTH), 0.0));
+		accumulatedColor = accumulatedColor + tex2D(ReShade::BackBuffer, texcoord + float2(i * uvDistBetweenSamples - (0 / BUFFER_WIDTH), 0.0));
 	}
 	accumulatedColor = accumulatedColor * (1.0 / (1.0 + numOfSamplesRight * 2.0));
 
@@ -161,19 +163,19 @@ float4 BoxBlurHorizontalPass(in float4 pos : SV_Position, in float2 texcoord : T
 float4 BoxBlurVerticalPass(in float4 pos : SV_Position, in float2 texcoord : TEXCOORD) : COLOR
 {
 
-	if (VerticalBlurFactor == 0.0){
+	if (VerticalBlurFactor == 0.0) {
 		return tex2D(BoxBlurHSampler, texcoord);
-	} 
+	}
 	float pixelUVSize = 1.0 / (float)VerticalResolution;
 	float smoothScale = (float)VerticalBlurFactor
 ;
-	float uvDistBetweenSamples = ((pixelUVSize* smoothScale) - (1.0 / BUFFER_HEIGHT)) / (0.0 + numOfSamplesRight * 2.0); 
+	float uvDistBetweenSamples = ((pixelUVSize * smoothScale) - (1.0 / BUFFER_HEIGHT)) / (0.0 + numOfSamplesRight * 2.0);
 
 	float4 accumulatedColor = float4(0.0, 0.0, 0.0, 1.0);
 
 	for (float i = -numOfSamplesRight; i <= numOfSamplesRight; i++)
 	{
-		accumulatedColor = accumulatedColor + tex2D( BoxBlurHSampler, texcoord + float2(0.0, i * uvDistBetweenSamples - (0 / BUFFER_HEIGHT)));
+		accumulatedColor = accumulatedColor + tex2D(BoxBlurHSampler, texcoord + float2(0.0, i * uvDistBetweenSamples - (0 / BUFFER_HEIGHT)));
 	}
 	accumulatedColor = accumulatedColor * (1.0 / (1.0 + numOfSamplesRight * 2.0));
 
@@ -185,11 +187,11 @@ float3 PixelationPass(in float4 pos : SV_Position, in float2 texcoord : TEXCOORD
 	float aspectRatio = 1.0 / BUFFER_ASPECT_RATIO;
 	float PixelUVSize = 1.0 / (float)VerticalResolution;
 
-	float pixelUVSizeX; 
-	if (HorizontalResolution <= 0.0){
+	float pixelUVSizeX;
+	if (HorizontalResolution <= 0.0) {
 		pixelUVSizeX = PixelUVSize * aspectRatio;
 	}
-	else{
+	else {
 		pixelUVSizeX = 1.0 / (float)HorizontalResolution;
 	}
 	float pixelUVSizeY = PixelUVSize;
@@ -221,15 +223,15 @@ float3 PixelationPass(in float4 pos : SV_Position, in float2 texcoord : TEXCOORD
 		return NNPixelColor;
 	}
 
-	
+
 	float tx = texcoordDistFromPixelX / pixelUVSizeX;
 	float ty = texcoordDistFromPixelY / pixelUVSizeY;
 
 	float horizontalPowerAmount = 0.75 + HorizontalUpscalingSetting * 0.25;
 	float verticalPowerAmount = 0.75 + VerticalUpscalingSetting * 0.25;
-		
-	tx = tx < 0.5 ? pow( abs(tx), horizontalPowerAmount ) : pow( abs(tx), 1.0 / horizontalPowerAmount );
-	ty = ty < 0.5 ? pow( abs(ty), verticalPowerAmount ) : pow( abs(ty), 1.0 / verticalPowerAmount );
+
+	tx = tx < 0.5 ? pow(abs(tx), horizontalPowerAmount) : pow(abs(tx), 1.0 / horizontalPowerAmount);
+	ty = ty < 0.5 ? pow(abs(ty), verticalPowerAmount) : pow(abs(ty), 1.0 / verticalPowerAmount);
 
 	float2 nextCoordShift = float2(pixelUVSizeX, pixelUVSizeY);
 
@@ -241,7 +243,7 @@ float3 PixelationPass(in float4 pos : SV_Position, in float2 texcoord : TEXCOORD
 
 	float2 nextCoordUpRight = thisCoord + nextCoordShift;
 
-	if (HorizontalUpscalingSetting == 0){
+	if (HorizontalUpscalingSetting == 0) {
 		float NNHCoord = NNThisCoord.x;
 		thisCoord.x = NNHCoord;
 		nextCoordUp.x = NNHCoord;
@@ -249,7 +251,7 @@ float3 PixelationPass(in float4 pos : SV_Position, in float2 texcoord : TEXCOORD
 		nextCoordUpRight.x = NNHCoord;
 	}
 
-	if (VerticalUpscalingSetting == 0){
+	if (VerticalUpscalingSetting == 0) {
 		float NNVCoord = NNThisCoord.y;
 		thisCoord.y = NNVCoord;
 		nextCoordUp.y = NNVCoord;
