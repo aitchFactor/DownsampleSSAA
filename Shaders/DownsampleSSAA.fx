@@ -66,20 +66,22 @@ uniform float HorizontalResolution
 <
 	ui_type = "input";
 	ui_min = 0.0; ui_max = 1920.0;
-	ui_tooltip = "Set to 0.0 for automatic.";
+	ui_tooltip = "Set to 0.0 or negative for automatic.";
 > = 0.0;
 
 uniform float HorizontalBlurFactor
 <
 	ui_type = "drag";
-	ui_min = 0.0; ui_max = 10.0; ui_step = 0.01;
-	ui_tooltip = "Sets the blur width in downsampled pixels.";
+	ui_min = -0.01; ui_max = 10.0; ui_step = 0.01;
+	ui_tooltip = "Sets the blur width in downsampled pixels. Set to negative for automatic (horizontal blur is synced to vertical resolution)";
+	ui_label = "Horizontal Blur";
 > = 1.0;
 
 uniform float VerticalBlurFactor
 <
 	ui_type = "drag";
 	ui_min = 0.0; ui_max = 10.0; ui_step = 0.01;
+	ui_label = "Vertical Blur";
 	ui_tooltip = "Sets the blur height in downsampled pixels.";
 > = 1.0;
 
@@ -122,18 +124,24 @@ float4 BoxBlurHorizontalPass(in float4 pos : SV_Position, in float2 texcoord : T
 	if (HorizontalBlurFactor == 0.0){
 		return tex2D(ReShade::BackBuffer, texcoord);
 	} 
+
 	
 	float aspectRatio = 1.0 / BUFFER_ASPECT_RATIO;
 	float pixelUVSize;
-	if (HorizontalResolution == 0.0){
+	if (HorizontalResolution <= 0.0){
 		pixelUVSize = (1.0 / (float)VerticalResolution) * aspectRatio;
 	}
 	else{
 		pixelUVSize = (1.0 / (float)HorizontalResolution);
 	}
 	
-	// 1 should mean crisp pixels; in other words, the width of the filter capture should be exactly the size of the downscaled pixel.
-	float smoothScale = (float)HorizontalBlurFactor
+	if (HorizontalBlurFactor < 0.0){
+		float smoothScale =  (float)HorizontalResolution/((1.0 / (float)VerticalResolution) * aspectRatio)
+	}
+	else{
+		float smoothScale = (float)HorizontalBlurFactor
+	}
+	
 ;
 	float uvDistBetweenSamples = ((pixelUVSize * smoothScale) - (1.0 / BUFFER_WIDTH)) / (0.0 + numOfSamplesRight * 2.0); 
 
@@ -178,7 +186,7 @@ float3 PixelationPass(in float4 pos : SV_Position, in float2 texcoord : TEXCOORD
 	float PixelUVSize = 1.0 / (float)VerticalResolution;
 
 	float pixelUVSizeX; 
-	if (HorizontalResolution == 0.0){
+	if (HorizontalResolution <= 0.0){
 		pixelUVSizeX = PixelUVSize * aspectRatio;
 	}
 	else{
