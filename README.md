@@ -12,7 +12,7 @@ Additional settings have also been added for use with CRT filters like Sony Mega
 
 ### Comparisons
 Nearest neighbour
-<img width="2560" height="1440" alt="soh 2025-11-30 00-25-18" src="https://github.com/user-attachments/assets/88e629d9-15aa-423d-a82c-e76e1e9fbe91" />
+<img width="2560" height="1440" alt="soh 2025-11-30 00-46-47" src="https://github.com/user-attachments/assets/b3acc17f-3ea5-4aa0-8a0b-90812be74c4a" /> <img width="2560" height="1440" alt="soh 2025-11-30 00-25-18" src="https://github.com/user-attachments/assets/88e629d9-15aa-423d-a82c-e76e1e9fbe91" /> 
 No downsampling
 <img width="2560" height="1440" alt="soh 2025-11-30 00-40-35" src="https://github.com/user-attachments/assets/4b3ca761-ed5b-4b87-95c8-9bb730f2b298" /> <img width="2560" height="1440" alt="soh 2025-11-30 00-23-27" src="https://github.com/user-attachments/assets/757f6a28-83b9-4fc7-8e5f-45cb11d3e3c8" />  
 CRT setup with Sony Megatron
