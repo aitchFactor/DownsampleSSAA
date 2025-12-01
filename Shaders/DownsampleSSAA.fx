@@ -97,15 +97,15 @@ uniform int SampleOffsetY
 ui_tooltip = "Use to align any integer scaled content to the downsampling filter.";
 > = 0.0;
 
-uniform int PanX
+uniform float PanX
 < __UNIFORM_SLIDER_INT1
-	ui_min = -20; ui_max = 20;
+	ui_min = -20; ui_max = 20; ui_step = 0.5;
 ui_tooltip = "Pans the output image horizontally.";
 > = 0.0;
 
-uniform int PanY
+uniform float PanY
 < __UNIFORM_SLIDER_INT1
-	ui_min = -20.0; ui_max = 20.0;
+	ui_min = -20.0; ui_max = 20.0; ui_step = 0.5;
 ui_tooltip = "Pans the output image vertically.";
 > = 0.0;
 
@@ -138,14 +138,14 @@ float4 BoxBlurHorizontalPass(in float4 pos : SV_Position, in float2 texcoord : T
 	float smoothScale;
 	if (HorizontalBlurFactor < 0.0) {
 
-		smoothScale =  (1.0/pixelUVSize) / (VerticalResolution / aspectRatio);
+		smoothScale =  (1.5/pixelUVSize) / (VerticalResolution / aspectRatio);
 	}
 	else {
 		smoothScale = (float)HorizontalBlurFactor;
 	}
 
-;
-	float uvDistBetweenSamples = ((pixelUVSize * smoothScale) - (1.0 / BUFFER_WIDTH)) / (0.0 + numOfSamplesRight * 2.0);
+	float bufferUVWidth = (1.0 / BUFFER_WIDTH);
+	float uvDistBetweenSamples = ((pixelUVSize * smoothScale) - bufferUVWidth) / (0.0 + numOfSamplesRight * 2.0);
 
 
 
@@ -153,7 +153,7 @@ float4 BoxBlurHorizontalPass(in float4 pos : SV_Position, in float2 texcoord : T
 
 	for (float i = -numOfSamplesRight; i <= numOfSamplesRight; i++)
 	{
-		accumulatedColor = accumulatedColor + tex2D(ReShade::BackBuffer, texcoord + float2(i * uvDistBetweenSamples - (0 / BUFFER_WIDTH), 0.0));
+		accumulatedColor = accumulatedColor + tex2D(ReShade::BackBuffer, texcoord + float2(i * uvDistBetweenSamples - (bufferUVWidth * 0.5), 0.0));
 	}
 	accumulatedColor = accumulatedColor * (1.0 / (1.0 + numOfSamplesRight * 2.0));
 
@@ -167,15 +167,17 @@ float4 BoxBlurVerticalPass(in float4 pos : SV_Position, in float2 texcoord : TEX
 		return tex2D(BoxBlurHSampler, texcoord);
 	}
 	float pixelUVSize = 1.0 / (float)VerticalResolution;
-	float smoothScale = (float)VerticalBlurFactor
-;
-	float uvDistBetweenSamples = ((pixelUVSize * smoothScale) - (1.0 / BUFFER_HEIGHT)) / (0.0 + numOfSamplesRight * 2.0);
+	float smoothScale = (float)VerticalBlurFactor;
+
+	float bufferUVHeight = (1.0 / BUFFER_HEIGHT);
+
+	float uvDistBetweenSamples = ((pixelUVSize * smoothScale) - (bufferUVHeight)) / (0 + numOfSamplesRight * 2.0);
 
 	float4 accumulatedColor = float4(0.0, 0.0, 0.0, 1.0);
 
 	for (float i = -numOfSamplesRight; i <= numOfSamplesRight; i++)
 	{
-		accumulatedColor = accumulatedColor + tex2D(BoxBlurHSampler, texcoord + float2(0.0, i * uvDistBetweenSamples - (0 / BUFFER_HEIGHT)));
+		accumulatedColor = accumulatedColor + tex2D(BoxBlurHSampler, texcoord + float2(0.0, i * uvDistBetweenSamples - (bufferUVHeight * 0.5)));
 	}
 	accumulatedColor = accumulatedColor * (1.0 / (1.0 + numOfSamplesRight * 2.0));
 
@@ -185,6 +187,7 @@ float4 BoxBlurVerticalPass(in float4 pos : SV_Position, in float2 texcoord : TEX
 float3 PixelationPass(in float4 pos : SV_Position, in float2 texcoord : TEXCOORD) : COLOR
 {
 	float aspectRatio = 1.0 / BUFFER_ASPECT_RATIO;
+	float2 TexcoordSize = float2(1.0 / BUFFER_WIDTH, 1.0 / BUFFER_HEIGHT);
 	float PixelUVSize = 1.0 / (float)VerticalResolution;
 
 	float pixelUVSizeX;
@@ -196,26 +199,18 @@ float3 PixelationPass(in float4 pos : SV_Position, in float2 texcoord : TEXCOORD
 	}
 	float pixelUVSizeY = PixelUVSize;
 
-	float fracSampleOffsetX = ((float)SampleOffsetX / BUFFER_WIDTH);
-	float fracSampleOffsetY = ((float)SampleOffsetY / BUFFER_HEIGHT);
+	float2 fracSampleOffset = float2(
+		TexcoordSize.x * (float)SampleOffsetX, 
+		TexcoordSize.y * (float)SampleOffsetY
+		);
+	float2 fracPan = float2(TexcoordSize.x * (float)PanX, TexcoordSize.y * (float)PanY);
 
-	float fracPanX = ((float)PanX / BUFFER_WIDTH);
-	float fracPanY = ((float)PanY / BUFFER_HEIGHT);
-
-
-	float texcoordDistFromPixelX = (fracSampleOffsetX + fracPanX + texcoord.x + 0.5 * pixelUVSizeX) % pixelUVSizeX;
-	float texcoordDistFromPixelY = (fracSampleOffsetY + fracPanY + texcoord.y + 0.5 * pixelUVSizeY) % pixelUVSizeY;
-
-	float NNTexcoordDistFromPixelX = (fracSampleOffsetX + fracPanX + texcoord.x) % pixelUVSizeX;
-	float NNTexcoordDistFromPixelY = (fracSampleOffsetY + fracPanY + texcoord.y) % pixelUVSizeY;
-
-	float2 thisCoord;
-	thisCoord.x = texcoord.x + fracPanX - texcoordDistFromPixelX;
-	thisCoord.y = texcoord.y + fracPanY - texcoordDistFromPixelY;
+	float NNTexcoordDistFromPixelX = (fracSampleOffset.x + texcoord.x) % pixelUVSizeX;
+	float NNTexcoordDistFromPixelY = (fracSampleOffset.y + texcoord.y) % pixelUVSizeY;
 
 	float2 NNThisCoord;
-	NNThisCoord.x = texcoord.x + fracPanX - NNTexcoordDistFromPixelX + 0.5 * pixelUVSizeX;
-	NNThisCoord.y = texcoord.y + fracPanY - NNTexcoordDistFromPixelY + 0.5 * pixelUVSizeY;
+	NNThisCoord.x = texcoord.x + fracPan.x - NNTexcoordDistFromPixelX + 0.5 * pixelUVSizeX + ((0.5 * TexcoordSize.x) % (0.5 * pixelUVSizeX));
+	NNThisCoord.y = texcoord.y + fracPan.y - NNTexcoordDistFromPixelY + 0.5 * pixelUVSizeY + ((0.5 * TexcoordSize.y) % (0.5 * pixelUVSizeY));
 
 	float3 NNPixelColor = tex2D(BoxBlurVSampler, NNThisCoord).rgb;
 	if (HorizontalUpscalingSetting == 0 & VerticalUpscalingSetting == 0)
@@ -223,6 +218,13 @@ float3 PixelationPass(in float4 pos : SV_Position, in float2 texcoord : TEXCOORD
 		return NNPixelColor;
 	}
 
+	float texcoordDistFromPixelX = (fracSampleOffset.x + fracPan.x + texcoord.x + 0.5 * pixelUVSizeX) % pixelUVSizeX;
+	float texcoordDistFromPixelY = (fracSampleOffset.y + fracPan.y + texcoord.y + 0.5 * pixelUVSizeY) % pixelUVSizeY;
+
+	float2 thisCoord;
+	thisCoord.x = texcoord.x + fracPan.x - texcoordDistFromPixelX + ((0.5 * TexcoordSize.x) % (0.5 * pixelUVSizeX));
+	thisCoord.y = texcoord.y + fracPan.y - texcoordDistFromPixelY + ((0.5 * TexcoordSize.y) % (0.5 * pixelUVSizeY));
+	
 
 	float tx = texcoordDistFromPixelX / pixelUVSizeX;
 	float ty = texcoordDistFromPixelY / pixelUVSizeY;
