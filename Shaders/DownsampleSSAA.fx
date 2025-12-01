@@ -137,8 +137,13 @@ float4 BoxBlurHorizontalPass(in float4 pos : SV_Position, in float2 texcoord : T
 
 	float smoothScale;
 	if (HorizontalBlurFactor < 0.0) {
+		if (pixelUVSize <= (1.0 / (float)VerticalResolution) * aspectRatio){
+			smoothScale =  (1.0/pixelUVSize) / (VerticalResolution / aspectRatio);
+		}
+		else{
 		// 1.5 looks close to downscaled resolution with bilinear but this isn't mathematically equivalent
-		smoothScale =  (1.5/pixelUVSize) / (VerticalResolution / aspectRatio);
+			smoothScale =  (1.5/pixelUVSize) / (VerticalResolution / aspectRatio);
+		}
 	}
 	else {
 		smoothScale = (float)HorizontalBlurFactor;
