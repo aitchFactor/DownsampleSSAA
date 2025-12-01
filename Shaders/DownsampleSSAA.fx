@@ -137,7 +137,7 @@ float4 BoxBlurHorizontalPass(in float4 pos : SV_Position, in float2 texcoord : T
 
 	float smoothScale;
 	if (HorizontalBlurFactor < 0.0) {
-		if (pixelUVSize <= (1.0 / (float)VerticalResolution) * aspectRatio){
+		if (pixelUVSize >= (1.0 / (float)VerticalResolution) * aspectRatio){
 			smoothScale =  (1.0/pixelUVSize) / (VerticalResolution / aspectRatio);
 		}
 		else{
