@@ -149,16 +149,16 @@ float4 BoxBlurHorizontalPass(in float4 pos : SV_Position, in float2 texcoord : T
 		smoothScale = (float)HorizontalBlurFactor;
 	}
 
-	float bufferUVWidth = (1.0 / BUFFER_WIDTH);
-	float uvDistBetweenSamples = ((pixelUVSize * smoothScale) - bufferUVWidth) / (0.0 + numOfSamplesRight * 2.0);
+	float texcoordWidth = (1.0 / BUFFER_WIDTH);
+	float uvDistBetweenSamples = ((pixelUVSize * smoothScale) - texcoordWidth) / (0.0 + numOfSamplesRight * 2.0);
 
-
+	float sampleShift = (texcoordWidth - ((pixelUVSize) % (2.0 * texcoordWidth))) * 0.5;
 
 	float4 accumulatedColor = float4(0.0, 0.0, 0.0, 1.0);
 
 	for (float i = -numOfSamplesRight; i <= numOfSamplesRight; i++)
 	{
-		accumulatedColor = accumulatedColor + tex2D(ReShade::BackBuffer, texcoord + float2(i * uvDistBetweenSamples - (bufferUVWidth * 0.5), 0.0));
+		accumulatedColor = accumulatedColor + tex2D(ReShade::BackBuffer, texcoord + float2(i * uvDistBetweenSamples - sampleShift, 0.0));
 	}
 	accumulatedColor = accumulatedColor * (1.0 / (1.0 + numOfSamplesRight * 2.0));
 
@@ -174,15 +174,16 @@ float4 BoxBlurVerticalPass(in float4 pos : SV_Position, in float2 texcoord : TEX
 	float pixelUVSize = 1.0 / (float)VerticalResolution;
 	float smoothScale = (float)VerticalBlurFactor;
 
-	float bufferUVHeight = (1.0 / BUFFER_HEIGHT);
+	float texcoordHeight = (1.0 / BUFFER_HEIGHT);
+	float uvDistBetweenSamples = ((pixelUVSize * smoothScale) - (texcoordHeight)) / (0 + numOfSamplesRight * 2.0);
 
-	float uvDistBetweenSamples = ((pixelUVSize * smoothScale) - (bufferUVHeight)) / (0 + numOfSamplesRight * 2.0);
+	float sampleShift = (texcoordHeight - ((pixelUVSize) % (2.0 * texcoordHeight))) * 0.5;
 
 	float4 accumulatedColor = float4(0.0, 0.0, 0.0, 1.0);
 
 	for (float i = -numOfSamplesRight; i <= numOfSamplesRight; i++)
 	{
-		accumulatedColor = accumulatedColor + tex2D(BoxBlurHSampler, texcoord + float2(0.0, i * uvDistBetweenSamples - (bufferUVHeight * 0.5)));
+		accumulatedColor = accumulatedColor + tex2D(BoxBlurHSampler, texcoord + float2(0.0, i * uvDistBetweenSamples - sampleShift));
 	}
 	accumulatedColor = accumulatedColor * (1.0 / (1.0 + numOfSamplesRight * 2.0));
 
@@ -203,6 +204,11 @@ float3 PixelationPass(in float4 pos : SV_Position, in float2 texcoord : TEXCOORD
 		pixelUVSizeX = 1.0 / (float)HorizontalResolution;
 	}
 	float pixelUVSizeY = PixelUVSize;
+	float2 PixelSizeinTexcoords = float2(pixelUVSizeX / TexcoordSize.x, pixelUVSizeY / TexcoordSize.y);
+	float2 fixedSampleShift = float2(
+		(TexcoordSize.x - (pixelUVSizeX) % (2.0 * TexcoordSize.x)) * 0.5, 
+		(TexcoordSize.y - (pixelUVSizeY) % (2.0 * TexcoordSize.y)) * 0.5
+	);
 
 	float2 fracSampleOffset = float2(
 		TexcoordSize.x * (float)SampleOffsetX, 
@@ -213,9 +219,12 @@ float3 PixelationPass(in float4 pos : SV_Position, in float2 texcoord : TEXCOORD
 	float NNTexcoordDistFromPixelX = (fracSampleOffset.x + texcoord.x) % pixelUVSizeX;
 	float NNTexcoordDistFromPixelY = (fracSampleOffset.y + texcoord.y) % pixelUVSizeY;
 
+	
 	float2 NNThisCoord;
-	NNThisCoord.x = texcoord.x + fracPan.x - NNTexcoordDistFromPixelX + 0.5 * pixelUVSizeX + ((0.5 * TexcoordSize.x) % (0.5 * pixelUVSizeX));
-	NNThisCoord.y = texcoord.y + fracPan.y - NNTexcoordDistFromPixelY + 0.5 * pixelUVSizeY + ((0.5 * TexcoordSize.y) % (0.5 * pixelUVSizeY));
+	NNThisCoord.x = texcoord.x + fracPan.x - NNTexcoordDistFromPixelX + 0.5 * pixelUVSizeX;
+	NNThisCoord.y = texcoord.y + fracPan.y - NNTexcoordDistFromPixelY + 0.5 * pixelUVSizeY;
+
+	NNThisCoord += fixedSampleShift;
 
 	float3 NNPixelColor = tex2D(BoxBlurVSampler, NNThisCoord).rgb;
 	if (HorizontalUpscalingSetting == 0 & VerticalUpscalingSetting == 0)
@@ -227,8 +236,10 @@ float3 PixelationPass(in float4 pos : SV_Position, in float2 texcoord : TEXCOORD
 	float texcoordDistFromPixelY = (fracSampleOffset.y + fracPan.y + texcoord.y + 0.5 * pixelUVSizeY) % pixelUVSizeY;
 
 	float2 thisCoord;
-	thisCoord.x = texcoord.x + fracPan.x - texcoordDistFromPixelX + ((0.5 * TexcoordSize.x) % (0.5 * pixelUVSizeX));
-	thisCoord.y = texcoord.y + fracPan.y - texcoordDistFromPixelY + ((0.5 * TexcoordSize.y) % (0.5 * pixelUVSizeY));
+	thisCoord.x = texcoord.x + fracPan.x - texcoordDistFromPixelX;
+	thisCoord.y = texcoord.y + fracPan.y - texcoordDistFromPixelY;
+
+	thisCoord += fixedSampleShift;
 	
 
 	float tx = texcoordDistFromPixelX / pixelUVSizeX;
