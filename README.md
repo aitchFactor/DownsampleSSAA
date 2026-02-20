@@ -17,3 +17,16 @@ No downsampling
 CRT setup with Sony Megatron
 <img width="2560" height="1440" alt="soh 2025-11-30 00-45-22" src="https://github.com/user-attachments/assets/077a7653-6eb2-45a7-9dee-3a15a7e038fc" /> <img width="2560" height="1440" alt="soh 2025-11-30 00-51-58" src="https://github.com/user-attachments/assets/b15b13da-ef2d-4f6d-8722-1f6edf7617ae" />
 
+## Addendum - using with Dolphin
+It is deceptively hard to make Dolphin output pixel-perfect video (The GameCube and Wii themselves natively outputted non-square, non-aligned pixels). Without additional ReShade shaders, it doesn't seem possible to have perfectly clean, nearest-neighbour scaled pixels that are correctly aligned to DownsampleSSAA, since the various nearest-neighbour-like scaling options also force a non-integer scale on the output. However, for a cleanly scaled output that matches the resolution of your monitor (allowing aligned, anti-aliased output with DownsampleSSAA) I was able to get satisfactory results with a monitor with an integer scale resolution of 480p (mine is 1440p) and the following settings: 
+- Post-Processing Effect set to `integer_scaling`, with "Use non-integer width" and "Scale width to fit 16:9" enabled. 
+- Output Resampling set to Default. (All other options seemingly override the `integer_scaling` effect.)
+- Once the above two settings are set, change Internal Resolution to the largest size that fits on your display.
+- Set DownsampleSSAA's `VerticalResolution` to 480 and `VerticalBlur` to 1.
+- Set `HorizontalResolution` to the width of your display.
+- Set `Horizontal Blur` to the scale of your display relative to 480p, or higher if you prefer.
+
+You can expect the results to look like this. The black border is normal, since many games internally render fewer than 480 horizontal lines.
+<img width="2560" height="1440" alt="Screenshot 2026-02-20 180907" src="https://github.com/user-attachments/assets/75dc78e1-093c-4e9a-81d2-911892b757c2" />
+
+Note that I have only so far tested games with widescreen support. Non-widescreen games likely require different settings.
